@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="panel form-grid" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h1>{{ 'Edit' if member else 'Add' }} youth member</h1>
+  <label>Full name<input name="full_name" value="{{ member.full_name if member }}" required></label>
+  <label>Gender<select name="gender">{% for g in ['Female','Male','Other'] %}<option {% if member and member.gender==g %}selected{% endif %}>{{ g }}</option>{% endfor %}</select></label>
+  <label>Age<input type="number" name="age" min="12" value="{{ member.age if member }}" required></label>
+  <label>Phone<input name="phone" value="{{ member.phone if member }}"></label>
+  <label>Email<input type="email" name="email" value="{{ member.email if member }}"></label>
+  <label>Address<input name="address" value="{{ member.address if member }}"></label>
+  <label>Education level<input name="education_level" value="{{ member.education_level if member }}"></label>
+  <label>Employment status<input name="employment_status" value="{{ member.employment_status if member }}"></label>
+  <label class="wide">Skills<textarea name="skills">{{ member.skills if member }}</textarea></label>
+  <label class="wide">Profile photo<input type="file" name="profile_photo" accept="image/*"></label>
+  <button class="btn" type="submit">Save member</button>
+</form>
+{% endblock %}

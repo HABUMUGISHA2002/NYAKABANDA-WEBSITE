@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero home-hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Nyakabanda Sector Youth Organization</span>
+    <h1>Nyakabanda Youth System</h1>
+    <p>A professional platform for youth membership, projects, events, announcements, feedback, and reports.</p>
+    <div class="actions">
+      <a class="btn" href="{{ url_for('main.public_member_register') }}">Register as a member</a>
+      <a class="btn ghost" href="{{ url_for('auth.login') }}">Sign in</a>
+    </div>
+  </div>
+</section>
+
+<section class="grid three home-features">
+  <article class="feature"><h3>Manage youth profiles</h3><p>Track skills, education, employment, and contact details in one searchable system.</p></article>
+  <article class="feature"><h3>Coordinate activities</h3><p>Plan events, register members, and record attendance for better community reporting.</p></article>
+  <article class="feature"><h3>Measure progress</h3><p>Follow project status, export member data, and generate monthly PDF summaries.</p></article>
+</section>
+
+<section class="home-section">
+  <div class="section-title"><h2>Latest events</h2>{% if session.get('user_id') %}<a href="{{ url_for('admin.events') }}">View all events</a>{% endif %}</div>
+  <div class="grid three">
+    {% for event in events %}
+      <article class="card">
+        {% if event.image_path %}
+          <img class="event-photo" src="{{ url_for('main.uploaded_file', filename=event.image_path) }}" alt="{{ event.title }} photo">
+        {% endif %}
+        <h3>{{ event.title }}</h3>
+        <p>{{ event.description }}</p>
+        <p class="muted">{{ event.location or 'Nyakabanda' }} · {{ event.starts_at }}</p>
+      </article>
+    {% else %}
+      <p class="muted empty-state">No events yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="home-section">
+  <div class="section-title"><h2>Latest announcements</h2><a href="{{ url_for('main.contact') }}">Contact us</a></div>
+  <div class="grid three">
+    {% for item in announcements %}
+      <article class="card"><span class="badge">{{ item.priority }}</span><h3>{{ item.title }}</h3><p>{{ item.body }}</p></article>
+    {% else %}
+      <p class="muted empty-state">No announcements yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

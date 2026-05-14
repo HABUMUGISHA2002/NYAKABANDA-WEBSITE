@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Login - Nyakabanda Youth System{% endblock %}
+{% block content %}
+<form class="auth-card" method="post">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h1>Welcome back</h1>
+  <label>Email<input type="email" name="email" required></label>
+  <label>Password<input type="password" name="password" required></label>
+  <button class="btn" type="submit">Login</button>
+  <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+</form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title"><h1>Events</h1><span class="muted">Calendar and attendance</span></div>
+<form class="toolbar" method="get"><input name="q" placeholder="Search events by title or location" value="{{ q or '' }}"><button class="btn small">Search</button></form>
+{% if session.get('role') == 'admin' and not edit_event %}
+<form class="panel form-grid" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h2>Create event</h2>
+  <label>Title<input name="title" required></label>
+  <label>Location<input name="location"></label>
+  <label>Event photo<input type="file" name="image" accept="image/*"></label>
+  <label>Starts at<input type="datetime-local" name="starts_at" required></label>
+  <label>Ends at<input type="datetime-local" name="ends_at"></label>
+  <label class="wide">Description<textarea name="description"></textarea></label>
+  <button class="btn">Save event</button>
+</form>
+{% endif %}
+{% if edit_event %}
+<form class="panel form-grid" method="post" enctype="multipart/form-data" action="{{ url_for('admin.event_edit', event_id=edit_event.id) }}">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h2>Edit event</h2>
+  <label>Title<input name="title" value="{{ edit_event.title }}" required></label>
+  <label>Location<input name="location" value="{{ edit_event.location }}"></label>
+  <label>Event photo<input type="file" name="image" accept="image/*"></label>
+  <label>Starts at<input type="datetime-local" name="starts_at" value="{{ edit_event.starts_at_value }}" required></label>
+  <label>Ends at<input type="datetime-local" name="ends_at" value="{{ edit_event.ends_at_value }}"></label>
+  <label class="wide">Description<textarea name="description">{{ edit_event.description }}</textarea></label>
+  <button class="btn">Update event</button>
+  <a class="btn small ghost" href="{{ url_for('admin.events') }}">Cancel</a>
+</form>
+{% endif %}
+<section class="grid two">
+{% for event in events %}
+  <article class="card event-card">
+    {% if event.image_path %}<img class="event-photo" src="{{ url_for('main.uploaded_file', filename=event.image_path) }}" alt="{{ event.title }} photo">{% endif %}
+    <h3>{{ event.title }}</h3><p>{{ event.description }}</p>
+    <p class="muted">{{ event.location }} · {{ event.starts_at }}</p>
+    <form method="post" action="{{ url_for('admin.event_register', event_id=event.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <select name="member_id">{% for member in members %}<option value="{{ member.id }}">{{ member.full_name }}</option>{% endfor %}</select>
+      <button class="btn small">Register member</button>
+    </form>
+    {% if session.get('role') == 'admin' %}
+    <div class="actions-cell">
+      <a href="{{ url_for('admin.event_edit', event_id=event.id) }}">Edit</a>
+      <form method="post" action="{{ url_for('admin.event_delete', event_id=event.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="link-danger">Delete</button></form>
+    </div>
+    {% endif %}
+    <details style="margin-top:10px"><summary class="muted">Attendees</summary>
+      {% set attendees = event_attendees.get(event.id, []) %}
+      {% if attendees %}
+      <ul>{% for a in attendees %}<li>{{ a.full_name }} <span class="badge">{{ a.status }}</span></li>{% endfor %}</ul>
+      {% else %}<p class="muted">No registrations yet.</p>{% endif %}
+    </details>
+  </article>
+{% endfor %}
+</section>
+{% endblock %}

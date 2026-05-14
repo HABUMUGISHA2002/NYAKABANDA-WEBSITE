@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title"><h1>Dashboard</h1><span class="muted">Live organization summary</span></div>
+<section class="stats">
+  <article><span>{{ stats.members }}</span><p>Total youth members</p></article>
+  <article><span>{{ stats.events }}</span><p>Total events</p></article>
+  <article><span>{{ stats.projects }}</span><p>Total projects</p></article>
+  <article><span>{{ stats.active_users }}</span><p>Active users</p></article>
+</section>
+<section class="grid two">
+  <article class="panel"><h2>Gender report</h2><canvas id="genderChart" data-values='{{ gender_rows|tojson }}'></canvas></article>
+  <article class="panel"><h2>Project status</h2><canvas id="projectChart" data-values='{{ project_rows|tojson }}'></canvas></article>
+</section>
+<section class="grid two">
+  <article class="panel"><h2>Upcoming and recent events</h2>{% for event in events %}<p><strong>{{ event.title }}</strong><br><span class="muted">{{ event.starts_at }}</span></p>{% endfor %}</article>
+  <article class="panel"><h2>Notifications</h2>{% for item in announcements %}<p><span class="badge">{{ item.priority }}</span> {{ item.title }}</p>{% endfor %}</article>
+</section>
+{% endblock %}

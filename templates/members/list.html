@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title">
+  <h1>Youth members</h1>
+  {% if session.get('role') == 'admin' %}<a class="btn small" href="{{ url_for('admin.member_new') }}">Add member</a>{% endif %}
+</div>
+<form class="toolbar" method="get"><input name="q" placeholder="Search by name, phone, email, skill" value="{{ term }}"><button class="btn small">Search</button></form>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Name</th><th>Gender</th><th>Age</th><th>Phone</th><th>Education</th><th>Employment</th><th></th></tr></thead>
+    <tbody>
+      {% for member in members %}
+      <tr>
+        <td>
+          <div class="member-row">
+            {% if member.profile_photo %}
+              <img class="member-thumb" src="{{ url_for('main.uploaded_file', filename=member.profile_photo) }}" alt="{{ member.full_name }} photo">
+            {% else %}
+              <span class="member-thumb placeholder">{{ member.full_name[:1] }}</span>
+            {% endif %}
+            <div>
+              <a href="{{ url_for('admin.member_detail', member_id=member.id) }}">{{ member.full_name }}</a><br>
+              <span class="muted">{{ member.email }}</span>
+            </div>
+          </div>
+        </td>
+        <td>{{ member.gender }}</td><td>{{ member.age }}</td><td>{{ member.phone }}</td><td>{{ member.education_level }}</td><td>{{ member.employment_status }}</td>
+        <td class="actions-cell">
+          {% if session.get('role') == 'admin' %}
+          <a href="{{ url_for('admin.member_edit', member_id=member.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('admin.member_delete', member_id=member.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="link-danger">Delete</button></form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if total_pages > 1 %}
+<div class="toolbar" style="margin-top:16px">
+  {% if page > 1 %}<a class="btn small ghost" href="{{ url_for('admin.members', q=term, page=page-1) }}">Previous</a>{% endif %}
+  <span class="muted">Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %}<a class="btn small ghost" href="{{ url_for('admin.members', q=term, page=page+1) }}">Next</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

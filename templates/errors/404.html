@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page not found - Nyakabanda Youth System{% endblock %}
+{% block content %}
+<section style="text-align:center;padding:80px 20px">
+  <h1 style="font-size:5rem;color:var(--primary)">404</h1>
+  <p class="muted" style="font-size:1.2rem">Page not found</p>
+  <a class="btn" href="{{ url_for('main.home') }}">Go home</a>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Member Registration - Nyakabanda Youth System{% endblock %}
+{% block content %}
+<div class="section-title">
+  <h1>Member registration</h1>
+  <span class="muted">Create your youth member profile</span>
+</div>
+
+<form class="panel form-grid" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <label>Full name<input name="full_name" required></label>
+  <label>Gender<select name="gender">{% for g in ['Female','Male','Other'] %}<option>{{ g }}</option>{% endfor %}</select></label>
+  <label>Age<input type="number" name="age" min="12" required></label>
+  <label>Phone<input name="phone"></label>
+  <label>Email<input type="email" name="email"></label>
+  <label>Address<input name="address"></label>
+  <label>Education level<input name="education_level"></label>
+  <label>Employment status<input name="employment_status"></label>
+  <label class="wide">Skills<textarea name="skills"></textarea></label>
+  <label class="wide">Profile photo<input type="file" name="profile_photo" accept="image/*"></label>
+  <button class="btn" type="submit">Submit registration</button>
+</form>
+{% endblock %}

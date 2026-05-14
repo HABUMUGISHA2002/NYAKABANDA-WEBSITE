@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="auth-card" method="post">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h1>Contact and feedback</h1>
+  <label>Name<input name="name" required></label>
+  <label>Email<input type="email" name="email"></label>
+  <label>Subject<input name="subject" required></label>
+  <label>Category<select name="category"><option value="contact">Contact</option><option value="feedback">Feedback</option></select></label>
+  <label>Message<textarea name="message" required></textarea></label>
+  <button class="btn">Submit message</button>
+</form>
+{% endblock %}

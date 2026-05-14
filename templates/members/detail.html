@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="section-title">
+  <h1>{{ member.full_name }}</h1>
+  <div class="actions">
+    {% if session.get('role') == 'admin' %}<a class="btn small" href="{{ url_for('admin.member_edit', member_id=member.id) }}">Edit</a>{% endif %}
+    <a class="btn small ghost" href="{{ url_for('admin.members') }}">Back to list</a>
+  </div>
+</div>
+<section class="grid two">
+  <article class="panel">
+    <h2>Profile</h2>
+    {% if member.profile_photo %}<img src="{{ url_for('main.uploaded_file', filename=member.profile_photo) }}" alt="Photo" class="profile-photo" style="margin-bottom:12px">{% endif %}
+    <p><strong>Gender:</strong> {{ member.gender }}</p>
+    <p><strong>Age:</strong> {{ member.age }}</p>
+    <p><strong>Phone:</strong> {{ member.phone or '—' }}</p>
+    <p><strong>Email:</strong> {{ member.email or '—' }}</p>
+    <p><strong>Address:</strong> {{ member.address or '—' }}</p>
+    <p><strong>Education:</strong> {{ member.education_level or '—' }}</p>
+    <p><strong>Employment:</strong> {{ member.employment_status or '—' }}</p>
+    <p><strong>Skills:</strong> {{ member.skills or '—' }}</p>
+  </article>
+  <article class="panel">
+    <h2>Event history</h2>
+    {% for ea in events_attended %}
+      <p><strong>{{ ea.title }}</strong><br><span class="muted">{{ ea.starts_at }} · </span><span class="badge">{{ ea.status }}</span></p>
+    {% else %}
+      <p class="muted">No event attendance recorded.</p>
+    {% endfor %}
+  </article>
+</section>
+{% endblock %}

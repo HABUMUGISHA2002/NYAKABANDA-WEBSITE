@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Feedback messages</h1>
+<div class="grid two">
+{% for item in feedback %}
+  <article class="card"><span class="badge">{{ item.category }}</span><h3>{{ item.subject }}</h3><p>{{ item.message }}</p><p class="muted">{{ item.name }} · {{ item.email }}</p></article>
+{% endfor %}
+</div>
+{% endblock %}
