@@ -127,7 +127,15 @@ def ensure_admin(app):
 def init_app(app):
     app.teardown_appcontext(close_db)
     ensure_uploads(app)
-    ensure_database(app)
-    ensure_schema(app)
-    ensure_columns(app)
-    ensure_admin(app)
+    try:
+        ensure_database(app)
+        ensure_schema(app)
+        ensure_columns(app)
+        ensure_admin(app)
+        app.config["DATABASE_READY"] = True
+    except mysql.connector.Error:
+        app.config["DATABASE_READY"] = False
+        app.logger.exception(
+            "Database setup skipped. Check MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, "
+            "MYSQL_DATABASE, and MYSQL_PORT environment variables."
+        )

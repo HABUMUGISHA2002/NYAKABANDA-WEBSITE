@@ -38,6 +38,10 @@ def create_app():
     def projects_alias():
         return redirect(url_for("admin.projects"))
 
+    @app.route("/healthz")
+    def healthz():
+        return {"status": "ok", "database_ready": bool(app.config.get("DATABASE_READY"))}
+
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404
