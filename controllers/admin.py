@@ -25,6 +25,10 @@ def clamp(value, minimum, maximum):
     return max(minimum, min(maximum, value))
 
 
+def choice(value, allowed, default):
+    return value if value in allowed else default
+
+
 def datetime_local_value(value):
     if not value:
         return ""
@@ -78,7 +82,7 @@ def member_form(member=None):
         age = parse_int(request.form.get("age"), 0)
         data = (
             request.form.get("full_name", "").strip(),
-            request.form.get("gender", "Other"),
+            choice(request.form.get("gender"), {"Female", "Male", "Other"}, "Other"),
             age,
             request.form.get("phone", "").strip(),
             request.form.get("email", "").strip(),
@@ -205,7 +209,7 @@ def event_register(event_id):
 @admin_required
 def event_attendance(event_id):
     member_id = request.form.get("member_id")
-    status = request.form.get("status", "attended")
+    status = choice(request.form.get("status"), {"registered", "attended", "absent"}, "attended")
     if not member_id:
         flash("Please choose a member.", "danger")
         return redirect(url_for("admin.events"))
@@ -267,15 +271,20 @@ def projects():
         if session.get("role") != "admin":
             flash("Only admins can manage projects.", "danger")
             return redirect(url_for("admin.projects"))
+        name = request.form.get("name", "").strip()
+        if len(name) < 3:
+            flash("Please enter a valid project name.", "danger")
+            return redirect(url_for("admin.projects"))
         image = save_upload(request.files.get("image"), "projects")
         file_path = save_upload(request.files.get("file"), "projects")
         progress = clamp(parse_int(request.form.get("progress"), 0), 0, 100)
+        status = choice(request.form.get("status"), {"planned", "active", "completed", "paused"}, "planned")
         query(
             "INSERT INTO projects (name, description, status, progress, image_path, file_path, created_by) VALUES (%s,%s,%s,%s,%s,%s,%s)",
             (
-                request.form.get("name", "").strip(),
+                name,
                 request.form.get("description", "").strip(),
-                request.form.get("status", "planned"),
+                status,
                 progress,
                 image,
                 file_path,
@@ -304,9 +313,14 @@ def project_edit(project_id):
     if request.method == "POST":
         image = save_upload(request.files.get("image"), "projects")
         file_path = save_upload(request.files.get("file"), "projects")
+        name = request.form.get("name", "").strip()
+        if len(name) < 3:
+            flash("Please enter a valid project name.", "danger")
+            return redirect(url_for("admin.project_edit", project_id=project_id))
         sql = "UPDATE projects SET name=%s, description=%s, status=%s, progress=%s"
         progress = clamp(parse_int(request.form.get("progress"), 0), 0, 100)
-        params = [request.form.get("name", "").strip(), request.form.get("description", "").strip(), request.form.get("status", "planned"), progress]
+        status = choice(request.form.get("status"), {"planned", "active", "completed", "paused"}, "planned")
+        params = [name, request.form.get("description", "").strip(), status, progress]
         if image:
             sql += ", image_path=%s"; params.append(image)
         if file_path:
@@ -329,12 +343,17 @@ def project_delete(project_id):
 @admin_bp.route("/announcements/new", methods=["POST"])
 @admin_required
 def announcement_new():
+    title = request.form.get("title", "").strip()
+    body = request.form.get("body", "").strip()
+    if len(title) < 3 or len(body) < 5:
+        flash("Please enter a valid announcement title and message.", "danger")
+        return redirect(url_for("main.announcements"))
     query(
         "INSERT INTO announcements (title, body, priority, created_by) VALUES (%s,%s,%s,%s)",
         (
-            request.form.get("title", "").strip(),
-            request.form.get("body", "").strip(),
-            request.form.get("priority", "normal"),
+            title,
+            body,
+            choice(request.form.get("priority"), {"normal", "important", "urgent"}, "normal"),
             session["user_id"],
         ),
         commit=True,

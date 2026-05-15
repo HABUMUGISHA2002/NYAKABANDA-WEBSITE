@@ -33,6 +33,10 @@ def parse_int(value, default=0):
         return default
 
 
+def choice(value, allowed, default):
+    return value if value in allowed else default
+
+
 @main_bp.route("/")
 def home():
     announcements = query("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 3")
@@ -46,7 +50,7 @@ def public_member_register():
         age = parse_int(request.form.get("age"), 0)
         data = (
             request.form.get("full_name", "").strip(),
-            request.form.get("gender", "Other"),
+            choice(request.form.get("gender"), {"Female", "Male", "Other"}, "Other"),
             age,
             request.form.get("phone", "").strip(),
             request.form.get("email", "").strip(),
@@ -109,7 +113,7 @@ def contact():
         email = request.form.get("email", "").strip()
         subject = request.form.get("subject", "").strip()
         message = request.form.get("message", "").strip()
-        category = request.form.get("category", "feedback")
+        category = choice(request.form.get("category"), {"contact", "feedback"}, "feedback")
         if len(name) < 2 or len(subject) < 3 or len(message) < 10:
             flash("Please complete the form with a clear message.", "danger")
         else:

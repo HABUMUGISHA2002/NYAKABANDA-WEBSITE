@@ -70,7 +70,7 @@ img, video, canvas { max-width: 100%; }
   color: white;
   background:
     linear-gradient(90deg, rgba(12, 78, 67, .93), rgba(12, 78, 67, .55)),
-    url("https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80") center/cover;
+    url("../images/adepr-nyakabanda-church.jpg") center/cover;
   box-shadow: var(--shadow);
 }
 .home-hero { margin-bottom: 22px; }

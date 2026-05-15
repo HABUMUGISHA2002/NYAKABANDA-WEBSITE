@@ -1,4 +1,5 @@
 import os
+import re
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -6,30 +7,46 @@ from flask import current_app, g
 from werkzeug.security import generate_password_hash
 
 
+def _connection_config(app, include_database=True):
+    config = {
+        "host": app.config["MYSQL_HOST"],
+        "user": app.config["MYSQL_USER"],
+        "password": app.config["MYSQL_PASSWORD"],
+        "port": app.config["MYSQL_PORT"],
+    }
+    if include_database:
+        config["database"] = app.config["MYSQL_DATABASE"]
+    return config
+
+
+def _quote_identifier(value):
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", value or ""):
+        raise ValueError("MYSQL_DATABASE contains unsupported characters.")
+    return f"`{value}`"
+
+
 def get_db():
     if "db" not in g:
-        g.db = mysql.connector.connect(
-            host=current_app.config["MYSQL_HOST"],
-            user=current_app.config["MYSQL_USER"],
-            password=current_app.config["MYSQL_PASSWORD"],
-            database=current_app.config["MYSQL_DATABASE"],
-            port=current_app.config["MYSQL_PORT"],
-        )
+        g.db = mysql.connector.connect(**_connection_config(current_app))
     return g.db
 
 
 def query(sql, params=None, one=False, commit=False):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(sql, params or ())
-    if commit:
-        conn.commit()
-        lastrowid = cursor.lastrowid
+    try:
+        cursor.execute(sql, params or ())
+        if commit:
+            conn.commit()
+            return cursor.lastrowid
+        rows = cursor.fetchall()
+        return (rows[0] if rows else None) if one else rows
+    except Exception:
+        if commit:
+            conn.rollback()
+        raise
+    finally:
         cursor.close()
-        return lastrowid
-    rows = cursor.fetchall()
-    cursor.close()
-    return (rows[0] if rows else None) if one else rows
 
 
 def close_db(_error=None):
@@ -42,6 +59,18 @@ def ensure_uploads(app):
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     for folder in ("members", "projects", "events", "reports"):
         os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], folder), exist_ok=True)
+
+
+def ensure_database(app):
+    database = _quote_identifier(app.config["MYSQL_DATABASE"])
+    conn = mysql.connector.connect(**_connection_config(app, include_database=False))
+    cursor = conn.cursor()
+    try:
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def ensure_schema(app):
@@ -98,6 +127,7 @@ def ensure_admin(app):
 def init_app(app):
     app.teardown_appcontext(close_db)
     ensure_uploads(app)
+    ensure_database(app)
     ensure_schema(app)
     ensure_columns(app)
     ensure_admin(app)
