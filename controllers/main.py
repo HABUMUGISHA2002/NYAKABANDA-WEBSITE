@@ -4,7 +4,7 @@ from flask import Blueprint, Response, current_app, flash, redirect, render_temp
 
 from controllers.security import login_required, validate_csrf
 from controllers.uploads import save_upload
-from models.database import query
+from models.database import query, query_optional
 
 main_bp = Blueprint("main", __name__)
 
@@ -39,8 +39,8 @@ def choice(value, allowed, default):
 
 @main_bp.route("/")
 def home():
-    announcements = query("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 3")
-    events = query("SELECT * FROM events ORDER BY starts_at DESC LIMIT 3")
+    announcements = query_optional("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 3", default=[])
+    events = query_optional("SELECT * FROM events ORDER BY starts_at DESC LIMIT 3", default=[])
     return render_template("home.html", announcements=announcements, events=events)
 
 

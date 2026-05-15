@@ -49,6 +49,16 @@ def query(sql, params=None, one=False, commit=False):
         cursor.close()
 
 
+def query_optional(sql, params=None, one=False, default=None):
+    if current_app.config.get("DATABASE_READY") is False:
+        return default
+    try:
+        return query(sql, params=params, one=one)
+    except mysql.connector.Error:
+        current_app.logger.exception("Optional database query failed")
+        return default
+
+
 def close_db(_error=None):
     db = g.pop("db", None)
     if db is not None:
